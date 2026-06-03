@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音账号运营助手</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>抖音账号运营助手</h1>
+            <p>数据分析 | 选题库 | 发布日历</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-btn active" data-tab="analysis">数据分析</button>
+            <button class="nav-btn" data-tab="topics">选题库</button>
+            <button class="nav-btn" data-tab="calendar">发布日历</button>
+            <button class="nav-btn" data-tab="comments">互动文案</button>
+            <button class="nav-btn" data-tab="brand">品牌合作</button>
+        </nav>
+
+        <!-- ====== 数据分析 ====== -->
+        <section id="tab-analysis" class="tab-content active">
+            <div class="card">
+                <h2>上传CSV数据</h2>
+                <div class="upload-area" id="uploadArea">
+                    <p>点击或拖拽上传CSV文件</p>
+                    <p class="upload-hint">支持抖音创作者后台导出的CSV数据</p>
+                    <input type="file" id="csvFile" accept=".csv" hidden>
+                </div>
+                <div id="uploadStatus"></div>
+            </div>
+
+            <div id="statsOverview" style="display:none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">总视频数</div>
+                        <div class="stat-value" id="statTotalVideos">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均点赞</div>
+                        <div class="stat-value" id="statAvgLikes">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均评论</div>
+                        <div class="stat-value" id="statAvgComments">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均点赞率</div>
+                        <div class="stat-value" id="statAvgLikeRate">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均评论率</div>
+                        <div class="stat-value" id="statAvgCommentRate">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">最高点赞</div>
+                        <div class="stat-value" id="statMaxLikes">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 爆款特征 -->
+            <div id="viralFeaturesArea" style="display:none;">
+                <div class="card viral-card">
+                    <h2>爆款特征分析</h2>
+                    <p id="viralRecommendation" class="viral-reco"></p>
+                    <div class="viral-details">
+                        <div class="viral-tag-group">
+                            <span class="viral-tag-label">高赞IP：</span>
+                            <span id="viralTopIPs"></span>
+                        </div>
+                        <div class="viral-tag-group">
+                            <span class="viral-tag-label">高赞风格：</span>
+                            <span id="viralTopStyles"></span>
+                        </div>
+                        <div class="viral-tag-group">
+                            <span class="viral-tag-label">标题热词：</span>
+                            <span id="viralTopKeywords"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chartsArea" style="display:none;">
+                <div class="card">
+                    <h3>IP角色表现排行</h3>
+                    <canvas id="ipChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>风格标签表现</h3>
+                    <canvas id="styleChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>点赞/评论趋势</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div id="postTimeCard" class="card" style="display:none;">
+                    <h3>最佳发布时间分析</h3>
+                    <canvas id="postTimeChart"></canvas>
+                    <p id="postTimeRecommendation" class="time-reco"></p>
+                </div>
+            </div>
+
+            <div id="videosTableArea" style="display:none;">
+                <div class="card">
+                    <h3>视频详情</h3>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>标题</th>
+                                    <th>IP角色</th>
+                                    <th>播放量</th>
+                                    <th>点赞</th>
+                                    <th>评论</th>
+                                    <th>点赞率</th>
+                                    <th>评论率</th>
+                                    <th>日期</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="clearAnalysisData()">清除分析数据</button>
+            </div>
+        </section>
+
+        <!-- ====== 选题库 ====== -->
+        <section id="tab-topics" class="tab-content" style="display:none;">
+            <div class="card">
+                <h2>添加选题</h2>
+                <form id="topicForm">
+                    <div class="form-group">
+                        <label>选题标题 *</label>
+                        <input type="text" id="topicTitle" required placeholder="例：甘雨古风舞蹈翻跳">
+                    </div>
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="topicCategory">
+                            <option value="">选择分类</option>
+                            <option value="IP角色">IP角色</option>
+                            <option value="热门音乐">热门音乐</option>
+                            <option value="舞蹈风格">舞蹈风格</option>
+                            <option value="场景布景">场景布景</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="topicDescription" rows="3" placeholder="记录选题的详细思路..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>参考链接</label>
+                        <input type="url" id="topicUrl" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加选题</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>选题库</h2>
+                <div id="topicsList"><p class="empty-hint">暂无选题，点击上方添加</p></div>
+            </div>
+        </section>
+
+        <!-- ====== 发布日历 ====== -->
+        <section id="tab-calendar" class="tab-content" style="display:none;">
+            <div class="card">
+                <h2>添加发布计划</h2>
+                <form id="calendarForm">
+                    <div class="form-group">
+                        <label>发布日期 *</label>
+                        <input type="date" id="calendarDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>视频标题 *</label>
+                        <input type="text" id="calendarTitle" required placeholder="例：某IP舞蹈翻跳">
+                    </div>
+                    <div class="form-group">
+                        <label>内容分类</label>
+                        <select id="calendarCategory">
+                            <option value="">选择分类</option>
+                            <option value="IP翻跳">IP翻跳</option>
+                            <option value="热舞">热舞</option>
+                            <option value="古风">古风</option>
+                            <option value="日常">日常</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="calendarNotes" rows="2" placeholder="道具、场景等准备事项..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加计划</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>发布计划</h2>
+                <div id="calendarList"><p class="empty-hint">暂无计划，点击上方添加</p></div>
+            </div>
+        </section>
+
+        <!-- ====== 互动文案模板库 ====== -->
+        <section id="tab-comments" class="tab-content" style="display:none;">
+            <div class="card">
+                <h2>添加评论引导文案</h2>
+                <form id="commentTemplateForm">
+                    <div class="form-group">
+                        <label>文案内容 *</label>
+                        <textarea id="ctContent" rows="2" required placeholder="例：这个角色哪个动作最难？评论告诉我~"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>适用IP/风格</label>
+                        <input type="text" id="ctIpStyle" placeholder="例：甘雨 / 古风 / 通用">
+                    </div>
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="ctCategory">
+                            <option value="选择题">选择题（引导评论）</option>
+                            <option value="悬念式">悬念式（前3秒钩子）</option>
+                            <option value="投票式">投票式（比较互动）</option>
+                            <option value="通用">通用引导</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <input type="text" id="ctNotes" placeholder="使用场景说明...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加文案</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>文案模板库</h2>
+                <div id="commentTemplatesList"><p class="empty-hint">暂无文案模板</p></div>
+            </div>
+        </section>
+
+        <!-- ====== 品牌合作数据包 ====== -->
+        <section id="tab-brand" class="tab-content" style="display:none;">
+            <div class="card">
+                <h2>品牌合作数据包</h2>
+                <p style="color:#888;margin-bottom:16px;">打印友好格式，适合发给品牌方</p>
+                <div class="brand-actions no-print">
+                    <button class="btn btn-primary" onclick="printBrandPage()">打印数据包</button>
+                    <button class="btn btn-secondary" onclick="exportBrandJSON()">导出 JSON</button>
+                </div>
+            </div>
+            <div id="brandContent">
+                <p class="empty-hint">暂无数据，请先在「数据分析」中上传CSV</p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <button class="btn btn-secondary" onclick="exportAllData()">导出所有数据 (JSON)</button>
+            <p class="footer-note">数据仅保存在服务器本地，不会上传到第三方</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='chart.umd.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

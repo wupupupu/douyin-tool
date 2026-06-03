@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "douyin-app",
+      "runtimeExecutable": "C:\\Users\\PC\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe",
+      "runtimeArgs": ["F:\\douyin-tool\\app.py"],
+      "cwd": "F:\\douyin-tool",
+      "port": 5000
+    }
+  ]
+}
